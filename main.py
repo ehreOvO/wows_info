@@ -1,6 +1,6 @@
 from wowspy import Wows
 from ships import PlayersShips, player_stats
-from tools import time_translate, get_players_id, initialization
+from tools import time_translate, get_players_id, initialization, _player_pr, color
 import os
 
 
@@ -28,10 +28,8 @@ def example():
 
 
 def run():
-    print('\n----------WoWSinfo 预览版----------\n')
+    print('\n----------WoWSinfo v1.0----------\n')
     initialization()
-    # ship_id_2_name=Ship_id_2_name()       #实例化船id与船名转化模块
-    players_ships = PlayersShips()  # 实例化显示玩家的所有玩过的船模块
     while 1:
         name_input = str(input('输入玩家id(建议复制粘贴，不区分大小写)：'))
         player_id = get_players_id(name_input)
@@ -42,10 +40,14 @@ def run():
     player_id = int(player_id)
 
     player_stats(player_id)
+    players_ships = PlayersShips(player_id=player_id)  # 实例化显示玩家的所有玩过的船模块
+    personal_pr = _player_pr(player_id=player_id)
+    print('PR:',int(round(personal_pr, 0)))
+    color(int(round(personal_pr, 0)))
+
     input('\n按回车键继续查询单船信息\n')
     while 1:
         i = os.system("cls")
-        players_ships.list_of_my_ships(player_id=player_id)
         players_ships.print_all_my_ships()
         players_ships.ships_details(player_id=player_id, ship_id=players_ships.xuhao_2_ship_id())
         input('\n按回车键继续\n')

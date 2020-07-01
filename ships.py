@@ -1,6 +1,6 @@
 from wowspy import Wows
 from prettytable import PrettyTable
-from tools import time_translate
+from tools import time_translate, ship_pr, color
 
 
 def ship_id_2_name(ship_id: str):
@@ -33,11 +33,11 @@ def player_stats(player_id):
     except ZeroDivisionError:
         pt.add_row(['PVP胜率', 'NULL'])
     try:
-        pt.add_row(['PVP场均伤害', round(statistics_pvp['damage_dealt'] / statistics_pvp['battles'], 0)])
+        pt.add_row(['PVP场均伤害', int(round(statistics_pvp['damage_dealt'] / statistics_pvp['battles'], 0))])
     except ZeroDivisionError:
         pt.add_row(['PVP场均伤害', 'NULL'])
     try:
-        pt.add_row(['PVP场均经验', round(statistics_pvp['xp'] / statistics_pvp['battles'], 0)])
+        pt.add_row(['PVP场均经验', int(round(statistics_pvp['xp'] / statistics_pvp['battles'], 0))])
     except ZeroDivisionError:
         pt.add_row(['PVP场均经验', 'NULL'])
     pt.add_row(['PvP存活', statistics_pvp['survived_battles']])
@@ -64,21 +64,20 @@ def player_stats(player_id):
 
 
 class PlayersShips:
-    def __init__(self):
-        self.player_ships_list = {}
-
-    def list_of_my_ships(self, player_id: int) -> list:
+    def __init__(self, player_id):
         wows = Wows()
+        self.__player_ships_list = {}
         ships_list = wows.statistics_of_players_ships(region=wows.region.AS, account_id=player_id, fields='ship_id')
-        self.player_ships_list = ships_list['data'][str(player_id)]
-        return self.player_ships_list
+        self.__player_ships_list = ships_list['data'][str(player_id)]
+        self.player_ships_list = self.__player_ships_list       # 用于被其他方法访问时使用
+
 
     def print_all_my_ships(self):
         pt = PrettyTable()
         pt.field_names = ['序号', '船名', 'ship_id']
-        for i in range(len(self.player_ships_list)):
-            name = ship_id_2_name(str(self.player_ships_list[i]['ship_id']))
-            ship_id = self.player_ships_list[i]['ship_id']
+        for i in range(len(self.__player_ships_list)):
+            name = ship_id_2_name(str(self.__player_ships_list[i]['ship_id']))
+            ship_id = self.__player_ships_list[i]['ship_id']
             pt.add_row([i + 1, name, ship_id])
         print(pt)
         return pt
@@ -87,13 +86,13 @@ class PlayersShips:
         while 1:
             try:
                 xuhao_input = int(input('输入所选择的船序号：')) - 1
-                print('选择的船是：', ship_id_2_name(str(self.player_ships_list[xuhao_input]['ship_id'])))
+                print('选择的船是：', ship_id_2_name(str(self.__player_ships_list[xuhao_input]['ship_id'])))
             except IndexError:
                 print('序号不存在！请重新输入：')
             except ValueError:
-                pass
+                print('序号不存在！请重新输入：')
             else:
-                return self.player_ships_list[xuhao_input]['ship_id']
+                return self.__player_ships_list[xuhao_input]['ship_id']
 
     def ships_details(self, player_id: int, ship_id: int):
         wows = Wows()
@@ -111,11 +110,15 @@ class PlayersShips:
         except ZeroDivisionError:
             pt.add_row(['PVP胜率', 'NULL'])
         try:
-            pt.add_row(['PVP场均伤害', round(pvp['damage_dealt'] / pvp['battles'], 0)])
+            pt.add_row(['PVP场均伤害', int(round(pvp['damage_dealt'] / pvp['battles'], 0))])
         except ZeroDivisionError:
             pt.add_row(['PVP场均伤害', 'NULL'])
         try:
-            pt.add_row(['PVP场均经验', round(pvp['xp'] / pvp['battles'], 0)])
+            pt.add_row(['PVP场均击杀', str(round(pvp['frags'] / pvp['battles'], 2))])
+        except ZeroDivisionError:
+            pt.add_row(['PVP场均伤害', 'NULL'])
+        try:
+            pt.add_row(['PVP场均经验', int(round(pvp['xp'] / pvp['battles'], 0))])
         except ZeroDivisionError:
             pt.add_row(['PVP场均经验', 'NULL'])
         pt.add_row(['PvP存活', pvp['survived_battles']])
@@ -138,6 +141,22 @@ class PlayersShips:
 
         print(pt)
 
+        print('PR:', end='')
+        try:
+            PR = ship_pr(
+                ship_id=ship_id,
+                actualDmg=pvp['damage_dealt'] / pvp['battles'],
+                actualFrags=pvp['frags'] / pvp['battles'],
+                actualWins=pvp['wins'] / pvp['battles']*100)
+            PR = int(round(PR, 0))
+        except:
+            print('0')
+        else:
+            print(PR)
+            color(PR)
+
 
 if __name__ == '__main__':
+    a = ship_id_2_name(str(3751753552))
+    print(a)
     pass
