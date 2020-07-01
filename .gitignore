@@ -124,5 +124,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# 我也不知道是干啥的
+# 我也不知道是干啥的,反正他每次都添加又好像没啥卵用
 .idea/
+
+# 运行缓存
+*.temp
